@@ -6,14 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "genres")
+@Table(name = "subgenres")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Genre {
+public class Subgenre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; // Nombre del género
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "genre_id", nullable = false)
+    private Genre genre;
 }

@@ -1,56 +1,51 @@
 package com.iesvegademijas.soundstream_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 @Entity
 @Table(name = "songs")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Song {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Exclude
     private Long id;
 
-    @Column(nullable = false)
-    private String name; // Nombre de la canción
+    private Double duration;
+    private Integer tempo;
+    private String instruments;
+    private String promptText;
 
-    @Column(nullable = false, unique = true)
-    private String url; // URL donde está almacenada la canción
+    @Column(columnDefinition = "TEXT")  // 🔹 Permite URLs largas
+    private String generatedUrl;
 
-    @Column(nullable = false)
-    private Double duration; // Duración en minutos
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Genre genre; // Género de la canción
-
-    @Column(nullable = false)
-    private String subgenre; // Subgénero de la canción (ej: Rock -> Hard Rock)
-
-    @Column(nullable = false)
-    private Integer tempo; // BPM (beats por minuto)
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt; // Fecha de creación
+    @JsonIgnore
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Usuario que generó la canción
-
-    @OneToOne
-    @JoinColumn(name = "prompt_id", nullable = false)
-    private Prompt prompt; // Prompt usado para generar la canción
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
-    @JoinColumn(name = "playlist_id", nullable = false)
-    private Playlist playlist; // Biblioteca donde está guardada esta canción
+    @JoinColumn(name = "playlist_id", nullable = true)
+    private Playlist playlist;
 
+    // 🔹 Relación con Genre (Género principal)
+    @ManyToOne
+    @JoinColumn(name = "genre_id")
+    private Genre genre;
+
+    // 🔹 Relación con Subgenre (Subgénero específico)
+    @ManyToOne
+    @JoinColumn(name = "subgenre_id", nullable = true)
+    private Subgenre subgenre;
 }

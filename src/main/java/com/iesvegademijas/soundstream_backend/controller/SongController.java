@@ -27,10 +27,10 @@ public class SongController {
     }
 
     // Obtener todas las canciones de un usuario
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Song>> getSongsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(songService.getSongsByUser(userId));
-    }
+    //    @GetMapping("/user/{userId}")
+    //    public ResponseEntity<List<Song>> getSongsByUser(@PathVariable Long userId) {
+    //        return ResponseEntity.ok(songService.getSongsByUser(userId));
+    //    }
 
     // Obtener una canción por ID con manejo de errores
     @GetMapping("/{id}")
@@ -41,13 +41,6 @@ public class SongController {
                     log.warn("Canción no encontrada con ID: " + id);
                     return ResponseEntity.notFound().build();
                 });
-    }
-
-    // Guardar una nueva canción con logs
-    @PostMapping
-    public ResponseEntity<Song> saveSong(@RequestBody Song song) {
-        log.info("Guardando nueva canción: " + song);
-        return ResponseEntity.status(201).body(songService.saveSong(song));
     }
 
     // Eliminar una canción con logs

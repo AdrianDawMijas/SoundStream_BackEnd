@@ -3,6 +3,7 @@ package com.iesvegademijas.soundstream_backend.service;
 import com.iesvegademijas.soundstream_backend.model.Playlist;
 import com.iesvegademijas.soundstream_backend.model.Song;
 import com.iesvegademijas.soundstream_backend.model.User;
+import com.iesvegademijas.soundstream_backend.repository.GenreRepository;
 import com.iesvegademijas.soundstream_backend.repository.PlaylistRepository;
 import com.iesvegademijas.soundstream_backend.repository.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
