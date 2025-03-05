@@ -3,6 +3,8 @@ package com.iesvegademijas.soundstream_backend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -10,8 +12,9 @@ import lombok.NoArgsConstructor;
 public class SongDTO {
     private Double duration;
     private Integer tempo;
-    private String instruments;
-    private String promptText; // Puede venir vacío
-    private String genre;  // Recibido como String desde Angular
-    private String subgenre; // Recibido como String desde Angular (puede ser null)
+    private List<String> instrumentNames = new ArrayList<>(); // ✅ Inicialización mutable
+    private String promptText;
+    private String genre;
+    private String subgenre;
+    private Long userId;
 }

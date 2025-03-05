@@ -1,10 +1,10 @@
 package com.iesvegademijas.soundstream_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "subscriptions")
 @Getter
@@ -20,25 +20,20 @@ public class Subscription {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private SubscriptionType type; // FREE, PERSONAL, PRO
+    private SubscriptionType type;
 
-    private LocalDateTime startDate; // Fecha de inicio de la suscripción
-    private LocalDateTime endDate; // Fecha de expiración (null si es FREE)
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private Integer maxTracksPerDay;
+    private Integer maxTracksPerMonth;
+    private Integer maxDownloadsPerDay;
+    private Integer maxDownloadsPerMonth;
+    private Double maxTrackLength;
+    private Boolean highQualityAudio;
+    private Boolean commercialUse;
 
-    private Integer maxTracksPerDay; // Creaciones diarias
-    private Integer maxTracksPerMonth; // Creaciones mensuales
-
-    private Integer maxDownloadsPerDay; // Descargas diarias
-
-    private Integer maxDownloadsPerMonth; // Descargas mensuales
-
-    private Double maxTrackLength; // Duración máxima de la canción en minutos
-
-    private Boolean priorityQueue; // Acceso prioritario a generación de IA
-    private Boolean highQualityAudio; // MP3/WAV en alta calidad
-
-    private Boolean commercialUse; // Uso comercial permitido
-
-    @OneToOne(mappedBy = "subscription")
+    @OneToOne(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonIgnore
     private User user;
 }

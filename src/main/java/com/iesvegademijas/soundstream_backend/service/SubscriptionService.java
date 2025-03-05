@@ -27,7 +27,6 @@ public class SubscriptionService {
                 subscription.setMaxDownloadsPerDay(1);
                 subscription.setMaxDownloadsPerMonth(null);
                 subscription.setMaxTrackLength(0.5);
-                subscription.setPriorityQueue(false);
                 subscription.setHighQualityAudio(false);
                 subscription.setCommercialUse(false);
                 subscription.setEndDate(null);
@@ -38,7 +37,6 @@ public class SubscriptionService {
                 subscription.setMaxDownloadsPerDay(null);
                 subscription.setMaxDownloadsPerMonth(300);
                 subscription.setMaxTrackLength(2.5);
-                subscription.setPriorityQueue(true);
                 subscription.setHighQualityAudio(true);
                 subscription.setCommercialUse(false);
                 subscription.setEndDate(LocalDateTime.now().plusMonths(12));
@@ -49,7 +47,6 @@ public class SubscriptionService {
                 subscription.setMaxDownloadsPerDay(null);
                 subscription.setMaxDownloadsPerMonth(500);
                 subscription.setMaxTrackLength(7.0);
-                subscription.setPriorityQueue(true);
                 subscription.setHighQualityAudio(true);
                 subscription.setCommercialUse(true);
                 subscription.setEndDate(LocalDateTime.now().plusMonths(12));

@@ -3,16 +3,19 @@ package com.iesvegademijas.soundstream_backend.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "songs")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Song {
 
     @Id
@@ -21,7 +24,15 @@ public class Song {
 
     private Double duration;
     private Integer tempo;
-    private String instruments;
+
+    @ManyToMany
+    @JoinTable(
+            name = "song_instruments",
+            joinColumns = @JoinColumn(name = "song_id"),
+            inverseJoinColumns = @JoinColumn(name = "instrument_id")
+    )
+    private List<Instrument> instruments;
+
     private String promptText;
 
     @Column(columnDefinition = "TEXT")  // 🔹 Permite URLs largas
