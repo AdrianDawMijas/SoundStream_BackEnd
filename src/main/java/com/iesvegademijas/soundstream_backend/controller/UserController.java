@@ -40,7 +40,7 @@ public class UserController {
     }
 
     // ✅ Crear un nuevo usuario con una suscripción por defecto
-    @PostMapping
+    @PostMapping("")
     @Transactional
     public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
         // Verificar si el email ya existe
