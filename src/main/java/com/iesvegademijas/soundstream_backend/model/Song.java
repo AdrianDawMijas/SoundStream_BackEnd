@@ -24,6 +24,7 @@ public class Song {
 
     private Double duration;
     private Integer tempo;
+    private String title;
 
     @ManyToMany
     @JoinTable(

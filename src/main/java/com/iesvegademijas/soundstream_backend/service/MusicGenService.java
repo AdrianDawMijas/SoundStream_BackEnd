@@ -1,84 +1,96 @@
 package com.iesvegademijas.soundstream_backend.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iesvegademijas.soundstream_backend.config.SongStorageProperties;
 import com.iesvegademijas.soundstream_backend.dto.SongDTO;
 import com.iesvegademijas.soundstream_backend.model.Song;
 import com.iesvegademijas.soundstream_backend.repository.SongRepository;
-import com.iesvegademijas.soundstream_backend.utils.HuggingFaceApiClient;
+import com.iesvegademijas.soundstream_backend.utils.AudioTrimmerService;
+import com.iesvegademijas.soundstream_backend.utils.GeneratedSongResult;
+import com.iesvegademijas.soundstream_backend.utils.PiapiDiffRhythmClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class MusicGenService {
 
-    private final HuggingFaceApiClient huggingFaceApiClient;
+    private final PiapiDiffRhythmClient sunoApiClient;
     private final SongRepository songRepository;
-    private final SongService songService;  // 🔥 Usamos SongService para evitar duplicación
+    private final SongService songService;
 
     @Autowired
-    public MusicGenService(HuggingFaceApiClient huggingFaceApiClient, SongRepository songRepository, SongService songService) {
-        this.huggingFaceApiClient = huggingFaceApiClient;
+    private SongStorageProperties songStorageProperties;
+
+    @Autowired
+    public MusicGenService(PiapiDiffRhythmClient sunoApiClient, SongRepository songRepository, SongService songService) {
+        this.sunoApiClient = sunoApiClient;
         this.songRepository = songRepository;
         this.songService = songService;
     }
 
-
     /**
-     * 🔹 Genera música usando Hugging Face y guarda la canción en la base de datos.
+     * 🔹 Genera música usando PiAPI y guarda la canción.
      */
-    public Song generateAndSaveMusic(SongDTO songDTO) throws IOException {
-        // 🔹 Construimos el prompt
-        String prompt = buildPrompt(songDTO);
+    public Song generateAndSaveMusic(SongDTO songDTO) throws Exception {
+        String prompt = songDTO.getPromptText();
 
-        // 🔹 Llamamos a la API y obtenemos los bytes de la respuesta
-        byte[] responseBody = huggingFaceApiClient.callMusicGenAPI(prompt);
+        if (prompt == null || prompt.isBlank()) {
+            prompt = "A " + songDTO.getGenre() + " track"
+                    + (songDTO.getSubgenre() != null ? " in the style of " + songDTO.getSubgenre() : "")
+                    + (songDTO.getInstrumentNames() != null && !songDTO.getInstrumentNames().isEmpty()
+                    ? " using " + String.join(", ", songDTO.getInstrumentNames()) : "");
+        }
 
-        // 🔹 Obtenemos el tipo de contenido de la respuesta
-        MediaType contentType = huggingFaceApiClient.getContentType(responseBody);
+        String taskId = sunoApiClient.submitGenerationTask(prompt);
+        GeneratedSongResult result = waitForGeneratedSong(taskId);
 
-        // 🔹 Creamos la canción usando SongService para asignar género, subgénero e instrumentos
+        if (result == null || result.getUrl() == null) {
+            throw new RuntimeException("No se pudo generar la canción (audio_url es null)");
+        }
+
         Song song = songService.createSongFromDTO(songDTO);
 
-        // 🔹 Procesamos la respuesta de la API
-        processApiResponse(responseBody, contentType, song);
+        if(songDTO.getDuration() != null && songDTO.getDuration() > 0) {
+            File trimmed = AudioTrimmerService.trimAudio(result.getUrl(), songDTO.getDuration());
+            Path outputPath = Paths.get(songStorageProperties.getStoragePath(), trimmed.getName());
+            Files.copy(trimmed.toPath(), outputPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("🔍 Tamaño del archivo recortado: " + trimmed.length());
+            Thread.sleep(500);
+            String finalUrl = songStorageProperties.getBaseUrl() + "/" + trimmed.getName();
+            System.out.println("🎧 URL generada para audio: " + finalUrl);
+            song.setGeneratedUrl(finalUrl);
+        }
+        else {
+            song.setGeneratedUrl(result.getUrl());
+            System.out.println("URL generada para audio: " + result.getUrl() );
+        }
 
-        // 🔹 Guardamos la canción en la base de datos
+
+        // Si quieres sobrescribir el título, solo si viene uno generado:
+        if (result.getTitle() != null && !result.getTitle().isBlank()) {
+            song.setTitle(result.getTitle());
+        }
+
         return songRepository.save(song);
     }
 
-    /**
-     * 🔹 Construye un prompt basado en el DTO.
-     */
-    private String buildPrompt(SongDTO songDTO) {
-        if (songDTO.getPromptText() != null && !songDTO.getPromptText().isEmpty()) {
-            return songDTO.getPromptText(); // 🔹 Si el usuario proporciona un prompt, lo usamos
+    private GeneratedSongResult waitForGeneratedSong(String taskId) throws Exception {
+        int maxRetries = 10;
+        int delayMillis = 3000;
+
+        for (int i = 0; i < maxRetries; i++) {
+            GeneratedSongResult result = sunoApiClient.pollForAudioUrl(taskId);
+            if (result != null && result.getUrl() != null) {
+                return result;
+            }
+            Thread.sleep(delayMillis);
         }
-        return "Generate a " + songDTO.getGenre() + " song with " + String.join(", ", songDTO.getInstrumentNames()) +
-                ", tempo: " + songDTO.getTempo() + " BPM, duration: " + songDTO.getDuration() + " minutes.";
+        return null;
     }
 
-    /**
-     * 🔹 Maneja la respuesta de la API y guarda el audio si es necesario.
-     */
-    private void processApiResponse(byte[] responseBody, MediaType contentType, Song song) throws IOException {
-        if (contentType.equals(MediaType.APPLICATION_JSON)) {
-            // 🔹 Si la respuesta es JSON, obtenemos la URL del audio
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(new String(responseBody));
-            song.setGeneratedUrl(jsonNode.get("audio_url").asText());
-        } else {
-            // 🔹 Si la respuesta es audio, lo guardamos en el servidor
-            Path filePath = Paths.get("generated_audio/" + UUID.randomUUID() + ".flac");
-            Files.write(filePath, responseBody);
-            song.setGeneratedUrl(filePath.toString());
-        }
-    }
 }

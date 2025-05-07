@@ -15,6 +15,7 @@ import java.util.Optional;
 @Tag(name = "Canciones", description = "Gestión de canciones generadas por IA")
 @Slf4j
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/v1/api/songs")
 public class SongController {
 
@@ -61,6 +62,12 @@ public class SongController {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    // 🔹 Obtener todas las canciones (solo para admin)
+    @GetMapping
+    public ResponseEntity<List<Song>> getAllSongs() {
+        return ResponseEntity.ok(songService.getAllSongs());
     }
 
 //    // 🔹 Obtener todas las canciones de un usuario con filtros dinámicos

@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import java.io.IOException;
-
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/music")
+@RequestMapping("/v1/api/songs")
 public class MusicController {
 
     private final MusicGenService musicGenService;
@@ -35,6 +35,8 @@ public class MusicController {
             // ❌ Manejo de errores si hay problemas con la API externa
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error generando la canción: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

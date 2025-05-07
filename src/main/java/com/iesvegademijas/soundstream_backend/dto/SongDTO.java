@@ -17,4 +17,5 @@ public class SongDTO {
     private String genre;
     private String subgenre;
     private Long userId;
+    private String title;
 }

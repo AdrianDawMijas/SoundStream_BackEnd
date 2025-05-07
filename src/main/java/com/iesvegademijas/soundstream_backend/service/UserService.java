@@ -1,6 +1,7 @@
 package com.iesvegademijas.soundstream_backend.service;
 
 
+import com.iesvegademijas.soundstream_backend.model.Role;
 import com.iesvegademijas.soundstream_backend.model.Subscription;
 import com.iesvegademijas.soundstream_backend.model.SubscriptionType;
 import com.iesvegademijas.soundstream_backend.model.User;
@@ -38,6 +39,10 @@ public class UserService {
             Subscription freeSubscription = subscriptionService.createSubscription(SubscriptionType.FREE);
             freeSubscription = subscriptionRepository.save(freeSubscription); // 🔹 Guardar explícitamente
             user.setSubscription(freeSubscription);
+        }
+        // 🔹 Establecer rol por defecto si no viene definido
+        if (user.getRole() == null) {
+            user.setRole(Role.USER);
         }
         return userRepository.save(user);
     }

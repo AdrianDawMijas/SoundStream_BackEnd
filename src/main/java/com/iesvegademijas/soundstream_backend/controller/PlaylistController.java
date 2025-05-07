@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @Tag(name = "Playlists", description = "Gestión de playlists y bibliotecas de usuarios")
 @RestController
 @RequestMapping("/v1/api/library")
