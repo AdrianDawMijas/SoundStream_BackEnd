@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-soundstream
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: soundstream
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
