@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "subscriptions")
 @Getter
@@ -24,13 +25,15 @@ public class Subscription {
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
     private Integer maxTracksPerDay;
     private Integer maxTracksPerMonth;
     private Integer maxDownloadsPerDay;
     private Integer maxDownloadsPerMonth;
-    private Double maxTrackLength;
-    private Boolean highQualityAudio;
-    private Boolean commercialUse;
+
+    private Double maxTrackLength;       // Duración máxima de cada canción
+    private Boolean highQualityAudio;    // ¿Permite audio en alta calidad?
+    private Boolean commercialUse;       // ¿Permite uso comercial?
 
     @OneToOne(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

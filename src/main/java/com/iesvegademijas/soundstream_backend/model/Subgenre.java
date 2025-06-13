@@ -1,10 +1,7 @@
 package com.iesvegademijas.soundstream_backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "subgenres")
@@ -13,19 +10,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Subgenre {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    private String name;
+    private String name; // Nombre del subgénero
 
     @ManyToOne
     @JoinColumn(name = "genre_id", nullable = false)
-    private Genre genre;
+    private Genre genre; // Género al que pertenece
 
-    public Subgenre(String subgenre, Genre genre) {
+    public Subgenre(String name, Genre genre) {
+        this.name = name;
         this.genre = genre;
-        this.name = subgenre;
     }
 }

@@ -1,7 +1,7 @@
 package com.iesvegademijas.soundstream_backend.repository;
 
-import com.iesvegademijas.soundstream_backend.model.Playlist;
 import com.iesvegademijas.soundstream_backend.model.Song;
+import com.iesvegademijas.soundstream_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,14 +13,14 @@ import java.util.List;
 public interface SongRepository extends JpaRepository<Song, Long> {
 
     // 🔹 Obtener todas las canciones dentro de una playlist
-    List<Song> findByPlaylistId(Long playlistId);
+    List<Song> findByUser_Id(Long userId);  // ✅ Esto usa el campo `user.id` internamente
 
     // 🔹 Filtrar canciones dentro de una playlist con múltiples criterios
     @Query("SELECT DISTINCT s FROM Song s " +
             "LEFT JOIN s.genre g " +
             "LEFT JOIN s.subgenre sub " +
             "LEFT JOIN s.instruments i " +
-            "WHERE s.playlist.id = :playlistId " +
+            "WHERE s.user.id = :playlistId " +
             "AND (:genreId IS NULL OR g.id = :genreId) " +
             "AND (:subgenreId IS NULL OR sub.id = :subgenreId) " +
             "AND (:minDuration IS NULL OR s.duration >= :minDuration) " +
@@ -34,6 +34,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             @Param("instrumentIds") List<Long> instrumentIds
     );
 
-    void deleteAllByPlaylist(Playlist library);
+    void deleteAllByUser(User user);
 }
 

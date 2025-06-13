@@ -2,10 +2,7 @@ package com.iesvegademijas.soundstream_backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,9 +19,9 @@ public class Song {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double duration;
-    private Integer tempo;
-    private String title;
+    private Double duration;     // Duración de la canción en segundos
+    private Integer tempo;       // Tempo en BPM
+    private String title;        // Título de la canción
 
     @ManyToMany
     @JoinTable(
@@ -34,11 +31,10 @@ public class Song {
     )
     private List<Instrument> instruments;
 
-    private String promptText;
+    private String promptText;   // Texto usado para generar la canción
 
-    @Column(columnDefinition = "TEXT")  // 🔹 Permite URLs largas
-    private String generatedUrl;
-
+    @Column(columnDefinition = "TEXT")
+    private String generatedUrl; // URL generada para acceder al audio
 
     @JsonIgnore
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -48,16 +44,10 @@ public class Song {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "playlist_id", nullable = true)
-    private Playlist playlist;
-
-    // 🔹 Relación con Genre (Género principal)
-    @ManyToOne
     @JoinColumn(name = "genre_id")
-    private Genre genre;
+    private Genre genre; // Género principal
 
-    // 🔹 Relación con Subgenre (Subgénero específico)
     @ManyToOne
-    @JoinColumn(name = "subgenre_id", nullable = true)
-    private Subgenre subgenre;
+    @JoinColumn(name = "subgenre_id")
+    private Subgenre subgenre; // Subgénero específico (opcional)
 }

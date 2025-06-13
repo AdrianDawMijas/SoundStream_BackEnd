@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class SongService {
@@ -33,18 +31,15 @@ public class SongService {
         this.userRepository = userRepository;
     }
 
-    public Optional<Song> getSongById(Long id) {
-        return songRepository.findById(id);
+    public List<Song> getSongsByUserId(Long userId) {
+        return songRepository.findByUser_Id(userId);
     }
 
     public Song saveSong(SongDTO songDTO) {
         Song song = createSongFromDTO(songDTO);
-
-        // 🔹 Buscar al usuario
         User user = userRepository.findById(songDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         song.setUser(user);
-
         return songRepository.save(song);
     }
 
@@ -55,22 +50,17 @@ public class SongService {
         song.setPromptText(songDTO.getPromptText());
         song.setCreatedAt(LocalDateTime.now());
 
-        // 🔹 Crear género si se proporciona
         if (songDTO.getGenre() != null && !songDTO.getGenre().isBlank()) {
             Genre genre = getOrCreateGenre(songDTO.getGenre());
             song.setGenre(genre);
 
-            // 🔹 Crear subgénero solo si también hay género
             if (songDTO.getSubgenre() != null && !songDTO.getSubgenre().isBlank()) {
                 Subgenre subgenre = getOrCreateSubgenre(songDTO.getSubgenre(), genre);
                 song.setSubgenre(subgenre);
             }
         }
 
-        // 🔹 Instrumentos
-        List<String> instrumentNames = songDTO.getInstrumentNames() != null
-                ? songDTO.getInstrumentNames()
-                : new ArrayList<>();
+        List<String> instrumentNames = Optional.ofNullable(songDTO.getInstrumentNames()).orElse(new ArrayList<>());
         song.setInstruments(getOrCreateInstruments(instrumentNames));
         song.setTitle(songDTO.getTitle());
 
@@ -87,27 +77,21 @@ public class SongService {
                 .orElseGet(() -> subgenreRepository.save(new Subgenre(subgenreName, genre)));
     }
 
-    private List<Instrument> getOrCreateInstruments(List<String> instrumentNames) {
-        if (instrumentNames.isEmpty()) return new ArrayList<>();
-
-        List<Instrument> existing = instrumentRepository.findByNameIn(instrumentNames);
-
-        return new ArrayList<>(instrumentNames.stream()
+    private List<Instrument> getOrCreateInstruments(List<String> names) {
+        if (names.isEmpty()) return new ArrayList<>();
+        List<Instrument> existing = instrumentRepository.findByNameIn(names);
+        return names.stream()
                 .map(name -> existing.stream()
                         .filter(i -> i.getName().equalsIgnoreCase(name))
                         .findFirst()
                         .orElseGet(() -> instrumentRepository.save(new Instrument(name))))
-                .toList());
+                .toList();
     }
 
-    public List<Song> getSongsByFilters(Long playlistId, Long genreId, Long subgenreId,
+    public List<Song> getSongsByFilters(Long userId, Long genreId, Long subgenreId,
                                         Double minDuration, Double maxDuration, List<Long> instrumentIds) {
         return songRepository.findByFilters(
-                playlistId,
-                genreId,
-                subgenreId,
-                minDuration,
-                maxDuration,
+                userId, genreId, subgenreId, minDuration, maxDuration,
                 (instrumentIds != null && !instrumentIds.isEmpty()) ? instrumentIds : null
         );
     }
@@ -121,7 +105,25 @@ public class SongService {
     }
 
     public List<Song> getAllSongs() {
-        return songRepository.findAll(); // Asegúrate de importar tu repositorio correctamente
+        return songRepository.findAll();
     }
 
+    public Optional<Song> getRandomSong() {
+        List<Song> all = songRepository.findAll();
+        return all.isEmpty() ? Optional.empty()
+                : Optional.of(all.get(new Random().nextInt(all.size())));
+    }
+
+    public boolean assignUserToSong(Long songId, Long userId) {
+        Optional<Song> optSong = songRepository.findById(songId);
+        Optional<User> optUser = userRepository.findById(userId);
+
+        if (optSong.isPresent() && optUser.isPresent()) {
+            Song song = optSong.get();
+            song.setUser(optUser.get());
+            songRepository.save(song);
+            return true;
+        }
+        return false;
+    }
 }

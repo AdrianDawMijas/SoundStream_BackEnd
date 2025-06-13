@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 
 @Service
 public class MusicGenService {
@@ -27,14 +24,16 @@ public class MusicGenService {
     private SongStorageProperties songStorageProperties;
 
     @Autowired
-    public MusicGenService(PiapiDiffRhythmClient sunoApiClient, SongRepository songRepository, SongService songService) {
+    public MusicGenService(PiapiDiffRhythmClient sunoApiClient,
+                           SongRepository songRepository,
+                           SongService songService) {
         this.sunoApiClient = sunoApiClient;
         this.songRepository = songRepository;
         this.songService = songService;
     }
 
     /**
-     * 🔹 Genera música usando PiAPI y guarda la canción.
+     * Genera música mediante la IA y guarda la canción en el sistema.
      */
     public Song generateAndSaveMusic(SongDTO songDTO) throws Exception {
         String prompt = songDTO.getPromptText();
@@ -46,51 +45,27 @@ public class MusicGenService {
                     ? " using " + String.join(", ", songDTO.getInstrumentNames()) : "");
         }
 
-        String taskId = sunoApiClient.submitGenerationTask(prompt);
-        GeneratedSongResult result = waitForGeneratedSong(taskId);
-
+        GeneratedSongResult result = sunoApiClient.submitSongGeneration(prompt);
         if (result == null || result.getUrl() == null) {
             throw new RuntimeException("No se pudo generar la canción (audio_url es null)");
         }
 
-        Song song = songService.createSongFromDTO(songDTO);
+        Song song = songService.saveSong(songDTO);
 
-        if(songDTO.getDuration() != null && songDTO.getDuration() > 0) {
+        if (songDTO.getDuration() != null && songDTO.getDuration() > 0) {
             File trimmed = AudioTrimmerService.trimAudio(result.getUrl(), songDTO.getDuration());
             Path outputPath = Paths.get(songStorageProperties.getStoragePath(), trimmed.getName());
             Files.copy(trimmed.toPath(), outputPath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("🔍 Tamaño del archivo recortado: " + trimmed.length());
-            Thread.sleep(500);
             String finalUrl = songStorageProperties.getBaseUrl() + "/" + trimmed.getName();
-            System.out.println("🎧 URL generada para audio: " + finalUrl);
             song.setGeneratedUrl(finalUrl);
-        }
-        else {
+        } else {
             song.setGeneratedUrl(result.getUrl());
-            System.out.println("URL generada para audio: " + result.getUrl() );
         }
 
-
-        // Si quieres sobrescribir el título, solo si viene uno generado:
         if (result.getTitle() != null && !result.getTitle().isBlank()) {
             song.setTitle(result.getTitle());
         }
 
         return songRepository.save(song);
     }
-
-    private GeneratedSongResult waitForGeneratedSong(String taskId) throws Exception {
-        int maxRetries = 10;
-        int delayMillis = 3000;
-
-        for (int i = 0; i < maxRetries; i++) {
-            GeneratedSongResult result = sunoApiClient.pollForAudioUrl(taskId);
-            if (result != null && result.getUrl() != null) {
-                return result;
-            }
-            Thread.sleep(delayMillis);
-        }
-        return null;
-    }
-
 }

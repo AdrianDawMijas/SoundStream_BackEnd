@@ -10,11 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Genre {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NonNull
     @Column(nullable = false)
-    private String name; // Nombre del género
+    private String name; // Nombre del género musical
 }

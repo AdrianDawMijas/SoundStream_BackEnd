@@ -1,18 +1,12 @@
 package com.iesvegademijas.soundstream_backend.service;
 
-
-import com.iesvegademijas.soundstream_backend.model.Role;
-import com.iesvegademijas.soundstream_backend.model.Subscription;
-import com.iesvegademijas.soundstream_backend.model.SubscriptionType;
-import com.iesvegademijas.soundstream_backend.model.User;
-import com.iesvegademijas.soundstream_backend.repository.SubscriptionRepository;
-import com.iesvegademijas.soundstream_backend.repository.UserRepository;
+import com.iesvegademijas.soundstream_backend.model.*;
+import com.iesvegademijas.soundstream_backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -26,6 +20,9 @@ public class UserService {
     @Autowired
     private SubscriptionRepository subscriptionRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -34,25 +31,32 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findUserByEmail(email);
+    }
+
     public User createUser(User user) {
+        if (!user.getPassword().startsWith("$2a$")) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         if (user.getSubscription() == null) {
             Subscription freeSubscription = subscriptionService.createSubscription(SubscriptionType.FREE);
-            freeSubscription = subscriptionRepository.save(freeSubscription); // 🔹 Guardar explícitamente
-            user.setSubscription(freeSubscription);
+            user.setSubscription(subscriptionRepository.save(freeSubscription));
         }
-        // 🔹 Establecer rol por defecto si no viene definido
+
         if (user.getRole() == null) {
             user.setRole(Role.USER);
         }
+
         return userRepository.save(user);
     }
 
+    public Optional<Subscription> getSubscriptionById(Long id) {
+        return subscriptionRepository.findById(id);
+    }
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findUserByEmail(email);
     }
 }

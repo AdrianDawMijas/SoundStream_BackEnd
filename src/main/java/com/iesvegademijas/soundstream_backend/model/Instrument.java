@@ -16,9 +16,9 @@ public class Instrument {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String name;  // 🔹 Nombre del instrumento (Piano, Guitarra, etc.)
+    private String name; // Nombre del instrumento (Piano, Guitarra, etc.)
 
-    private String category; // 🔹 Percusión, cuerda, viento, etc.
+    private String category; // Categoría del instrumento (percusión, cuerda, viento...)
 
     @Column(columnDefinition = "TEXT")
     private String description;

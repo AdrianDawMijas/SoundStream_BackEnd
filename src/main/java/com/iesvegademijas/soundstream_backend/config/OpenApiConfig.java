@@ -1,13 +1,11 @@
 package com.iesvegademijas.soundstream_backend.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.*;
+import io.swagger.v3.oas.models.info.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
 public class OpenApiConfig implements WebMvcConfigurer {
@@ -29,7 +27,6 @@ public class OpenApiConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 🔗 Mapear /songs/** a la carpeta ./songs en disco
         registry.addResourceHandler("/songs/**")
                 .addResourceLocations("file:./songs/");
     }
