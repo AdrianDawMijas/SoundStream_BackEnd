@@ -1,5 +1,6 @@
 package com.iesvegademijas.soundstream_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,39 +21,22 @@ public class Subscription {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private SubscriptionType type; // FREE, PERSONAL, PRO
+    private SubscriptionType type;
 
-    @Column(nullable = false)
-    private LocalDateTime startDate; // Fecha de inicio de la suscripción
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 
-    @Column(nullable = true)
-    private LocalDateTime endDate; // Fecha de expiración (null si es FREE)
+    private Integer maxTracksPerDay;
+    private Integer maxTracksPerMonth;
+    private Integer maxDownloadsPerDay;
+    private Integer maxDownloadsPerMonth;
 
-    @Column(nullable = false)
-    private Integer maxTracksPerDay; // Creaciones diarias
+    private Double maxTrackLength;       // Duración máxima de cada canción
+    private Boolean highQualityAudio;    // ¿Permite audio en alta calidad?
+    private Boolean commercialUse;       // ¿Permite uso comercial?
 
-    @Column(nullable = false)
-    private Integer maxTracksPerMonth; // Creaciones mensuales
-
-    @Column(nullable = false)
-    private Integer maxDownloadsPerDay; // Descargas diarias
-
-    @Column(nullable = false)
-    private Integer maxDownloadsPerMonth; // Descargas mensuales
-
-    @Column(nullable = false)
-    private Double maxTrackLength; // Duración máxima de la canción en minutos
-
-    @Column(nullable = false)
-    private Boolean priorityQueue; // Acceso prioritario a generación de IA
-
-    @Column(nullable = false)
-    private Boolean highQualityAudio; // MP3/WAV en alta calidad
-
-    @Column(nullable = false)
-    private Boolean commercialUse; // Uso comercial permitido
-
-    @OneToOne(mappedBy = "subscription")
+    @OneToOne(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonIgnore
     private User user;
 }
