@@ -104,7 +104,7 @@ public class PiapiDiffRhythmClient {
     private GeneratedSongResult pollForAudioUrl(String taskId) throws IOException, InterruptedException {
         String url = GET_URL_BASE + taskId;
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 30; i++) {
             Thread.sleep(10000); // Espera 10 segundos entre cada intento
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -196,7 +196,7 @@ public class PiapiDiffRhythmClient {
     private GeneratedSongResult pollDiffRhythmResult(String taskId) throws IOException, InterruptedException {
         String url = GET_URL_BASE + taskId;
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 30; i++) {
             Thread.sleep(10000);
 
             HttpRequest request = HttpRequest.newBuilder()
