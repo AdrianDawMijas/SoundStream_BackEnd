@@ -12,7 +12,6 @@ import java.io.IOException;
 /**
  * Controlador para la generación de canciones mediante IA.
  */
-@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/v1/api/songs")
 public class MusicController {

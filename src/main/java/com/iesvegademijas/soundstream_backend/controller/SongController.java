@@ -18,7 +18,6 @@ import java.util.Optional;
 @Tag(name = "Canciones", description = "Gestión de canciones generadas por IA")
 @Slf4j
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/v1/api/songs")
 public class SongController {
 

@@ -1,6 +1,5 @@
 package com.iesvegademijas.soundstream_backend.config;
 
-import com.iesvegademijas.soundstream_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
@@ -24,8 +23,11 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired private JwtAuthenticationFilter jwtAuthFilter;
-    @Autowired private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthFilter;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,7 +35,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/api/users/login", "/v1/api/users/login/google-token", "/v1/api/users").permitAll()
+                        .requestMatchers(
+                                "/v1/api/users/login",
+                                "/v1/api/users/login/google-token",
+                                "/v1/api/users"
+                        ).permitAll()
                         .requestMatchers("/v1/api/songs/random").permitAll()
                         .requestMatchers("/v1/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -61,7 +67,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        // Frontend local y Vercel
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "https://sound-stream-omega.vercel.app"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
