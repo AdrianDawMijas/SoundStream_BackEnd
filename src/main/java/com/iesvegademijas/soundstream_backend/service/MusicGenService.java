@@ -39,11 +39,13 @@ public class MusicGenService {
         String prompt = songDTO.getPromptText();
 
         if (prompt == null || prompt.isBlank()) {
-            prompt = "A " + songDTO.getGenre() + " track"
-                    + (songDTO.getSubgenre() != null ? " in the style of " + songDTO.getSubgenre() : "")
-                    + (songDTO.getInstrumentNames() != null && !songDTO.getInstrumentNames().isEmpty()
-                    ? " using " + String.join(", ", songDTO.getInstrumentNames()) : "");
+            prompt = "A " + songDTO.getGenre() + " track";
+
+            if (songDTO.getSubgenre() != null && !songDTO.getSubgenre().isBlank()) {
+                prompt += " in the style of " + songDTO.getSubgenre();
+            }
         }
+
 
         GeneratedSongResult result = sunoApiClient.submitSongGeneration(prompt);
         if (result == null || result.getUrl() == null) {
