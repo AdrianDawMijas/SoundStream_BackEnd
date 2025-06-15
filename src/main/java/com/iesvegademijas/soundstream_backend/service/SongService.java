@@ -62,7 +62,7 @@ public class SongService {
         }
 
         List<String> instrumentNames = Optional.ofNullable(songDTO.getInstrumentNames()).orElse(new ArrayList<>());
-        song.setInstruments(getOrCreateInstruments(instrumentNames));
+//        song.setInstruments(getOrCreateInstruments(instrumentNames));
         song.setTitle(songDTO.getTitle());
 
         return song;
@@ -78,26 +78,26 @@ public class SongService {
                 .orElseGet(() -> subgenreRepository.save(new Subgenre(subgenreName, genre)));
     }
 
-    private List<Instrument> getOrCreateInstruments(List<String> names) {
-        if (names.isEmpty()) return new ArrayList<>();
-
-        // Buscar todos los instrumentos ya existentes por nombre (ignorando mayúsculas)
-        List<Instrument> existing = instrumentRepository.findByNameInIgnoreCase(names);
-        Set<String> existingNames = existing.stream()
-                .map(i -> i.getName().toLowerCase())
-                .collect(Collectors.toSet());
-
-        List<Instrument> result = new ArrayList<>(existing);
-
-        for (String name : names) {
-            if (!existingNames.contains(name.toLowerCase())) {
-                Instrument newInstrument = new Instrument(name);
-                result.add(instrumentRepository.save(newInstrument));
-            }
-        }
-
-        return result;
-    }
+//    private List<Instrument> getOrCreateInstruments(List<String> names) {
+//        if (names.isEmpty()) return new ArrayList<>();
+//
+//        // Buscar todos los instrumentos ya existentes por nombre (ignorando mayúsculas)
+//        List<Instrument> existing = instrumentRepository.findByNameInIgnoreCase(names);
+//        Set<String> existingNames = existing.stream()
+//                .map(i -> i.getName().toLowerCase())
+//                .collect(Collectors.toSet());
+//
+//        List<Instrument> result = new ArrayList<>(existing);
+//
+//        for (String name : names) {
+//            if (!existingNames.contains(name.toLowerCase())) {
+//                Instrument newInstrument = new Instrument(name);
+//                result.add(instrumentRepository.save(newInstrument));
+//            }
+//        }
+//
+//        return result;
+//    }
 
     public List<Song> getSongsByFilters(Long userId, Long genreId, Long subgenreId,
                                         Double minDuration, Double maxDuration, List<Long> instrumentIds) {
