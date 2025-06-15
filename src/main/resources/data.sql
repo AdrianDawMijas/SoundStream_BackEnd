@@ -1,8 +1,6 @@
 INSERT INTO genres (id, name) VALUES
                                   (1,'Rock'),(2,'Pop'),(3,'Jazz'),(4,'Electronic'),(5,'Hip Hop');
 
-INSERT INTO instruments (id, name) VALUES
-                                       (1,'Drums'),(2,'Bass'),(3,'Guitar'),(4,'Strings'),(5,'Synth');
 
 INSERT INTO subgenres (id, name, genre_id) VALUES
                                                (1,'Indie Rock',1),(2,'Hard Rock',1),(3,'Dance Pop',2),

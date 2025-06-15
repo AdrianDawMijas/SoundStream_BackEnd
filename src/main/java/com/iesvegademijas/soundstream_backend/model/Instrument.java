@@ -15,7 +15,7 @@ public class Instrument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name; // Nombre del instrumento (Piano, Guitarra, etc.)
 
     private String category; // Categoría del instrumento (percusión, cuerda, viento...)
