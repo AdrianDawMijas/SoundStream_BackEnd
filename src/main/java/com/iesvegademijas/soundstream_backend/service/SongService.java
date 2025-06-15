@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SongService {
@@ -79,13 +80,23 @@ public class SongService {
 
     private List<Instrument> getOrCreateInstruments(List<String> names) {
         if (names.isEmpty()) return new ArrayList<>();
-        List<Instrument> existing = instrumentRepository.findByNameIn(names);
-        return names.stream()
-                .map(name -> existing.stream()
-                        .filter(i -> i.getName().equalsIgnoreCase(name))
-                        .findFirst()
-                        .orElseGet(() -> instrumentRepository.save(new Instrument(name))))
-                .toList();
+
+        // Buscar todos los instrumentos ya existentes por nombre (ignorando mayúsculas)
+        List<Instrument> existing = instrumentRepository.findByNameInIgnoreCase(names);
+        Set<String> existingNames = existing.stream()
+                .map(i -> i.getName().toLowerCase())
+                .collect(Collectors.toSet());
+
+        List<Instrument> result = new ArrayList<>(existing);
+
+        for (String name : names) {
+            if (!existingNames.contains(name.toLowerCase())) {
+                Instrument newInstrument = new Instrument(name);
+                result.add(instrumentRepository.save(newInstrument));
+            }
+        }
+
+        return result;
     }
 
     public List<Song> getSongsByFilters(Long userId, Long genreId, Long subgenreId,

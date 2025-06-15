@@ -11,4 +11,6 @@ public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
 
     @Query("SELECT i FROM Instrument i WHERE LOWER(i.name) IN :names")
     List<Instrument> findByNameIn(@Param("names") List<String> names);
+
+    List<Instrument> findByNameInIgnoreCase(List<String> names);
 }
